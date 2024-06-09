@@ -1,0 +1,16 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "koloswyklady", "koloswyklady\koloswyklady.csproj", "{49625EC5-E63E-474C-9651-738A38B0E902}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{49625EC5-E63E-474C-9651-738A38B0E902}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{49625EC5-E63E-474C-9651-738A38B0E902}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{49625EC5-E63E-474C-9651-738A38B0E902}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{49625EC5-E63E-474C-9651-738A38B0E902}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+EndGlobal
