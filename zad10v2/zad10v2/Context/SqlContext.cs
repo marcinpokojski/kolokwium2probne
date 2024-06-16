@@ -18,11 +18,12 @@ public class SqlContext : DbContext
     public DbSet<Prescription> Prescriptions { get; set; }
     public DbSet<Prescription_Medicament> PrescriptionMedicaments { get; set; }
     public DbSet<Patient> Patients { get; set; }
+    public DbSet<AppUser> Users { get; set; }
     
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         => optionsBuilder.UseSqlServer(
-            "Data Source=localhost;Initial Catalog=gakoprobny;User ID=sa;Password=Password2424%%;Integrated Security=False;Encrypt=False");
+            "Data Source=localhost;Initial Catalog=zad11;User ID=sa;Password=Password2424%%;Integrated Security=False;Encrypt=False");
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

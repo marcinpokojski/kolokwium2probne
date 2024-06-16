@@ -6,13 +6,13 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace zad10v2.Migrations
 {
     /// <inheritdoc />
-    public partial class InitialCreate1 : Migration
+    public partial class initial1 : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.CreateTable(
-                name: "Doctor",
+                name: "Doctors",
                 columns: table => new
                 {
                     IdDoctor = table.Column<int>(type: "int", nullable: false)
@@ -27,7 +27,7 @@ namespace zad10v2.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "Medicament",
+                name: "Medicaments",
                 columns: table => new
                 {
                     IdMedicament = table.Column<int>(type: "int", nullable: false)
@@ -43,7 +43,7 @@ namespace zad10v2.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "Patient",
+                name: "Patients",
                 columns: table => new
                 {
                     IdPatient = table.Column<int>(type: "int", nullable: false)
@@ -58,7 +58,25 @@ namespace zad10v2.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "Prescription",
+                name: "Users",
+                columns: table => new
+                {
+                    IdUser = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Login = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Email = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Password = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Salt = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    RefreshToken = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    RefreshTokenExp = table.Column<DateTime>(type: "datetime2", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Users", x => x.IdUser);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Prescriptions",
                 columns: table => new
                 {
                     IdPrescription = table.Column<int>(type: "int", nullable: false)
@@ -86,7 +104,7 @@ namespace zad10v2.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "PrescriptionMedicament",
+                name: "PrescriptionMedicaments",
                 columns: table => new
                 {
                     IdMedicament = table.Column<int>(type: "int", nullable: false),
@@ -130,19 +148,22 @@ namespace zad10v2.Migrations
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropTable(
-                name: "PrescriptionMedicament");
+                name: "PrescriptionMedicaments");
 
             migrationBuilder.DropTable(
-                name: "Medicament");
+                name: "Users");
 
             migrationBuilder.DropTable(
-                name: "Prescription");
+                name: "Medicaments");
 
             migrationBuilder.DropTable(
-                name: "Doctor");
+                name: "Prescriptions");
 
             migrationBuilder.DropTable(
-                name: "Patient");
+                name: "Doctors");
+
+            migrationBuilder.DropTable(
+                name: "Patients");
         }
     }
 }

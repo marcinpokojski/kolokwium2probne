@@ -1,4 +1,8 @@
+using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
+using System.Text;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
 using zad10v2.Context;
 using zad10v2.DTOs;
 using zad10v2.Enums;
@@ -9,10 +13,12 @@ namespace zad10v2.Repositories;
 public class AptekaRepository : IAptekaRepsitory
 {
     private readonly SqlContext _sqlContext;
+    private readonly IConfiguration _configuration;
 
-    public AptekaRepository(SqlContext sqlContext)
+    public AptekaRepository(IConfiguration configuration, SqlContext sqlContext)
     {
         _sqlContext = sqlContext;
+        _configuration = configuration;
     }
 
     public async Task<Errors> AddNewRecepta(PrescriptionDTO prescriptionDto)
@@ -154,5 +160,109 @@ public class AptekaRepository : IAptekaRepsitory
 
         };
         return patientDtoToShow;
+    }
+    
+    public async Task<Errors> AddUser(RegisterRequest model)
+    {
+        var hashedPasswordAndSalt = SecurityHelpers.GetHashedPasswordAndSalt(model.Password);
+        
+        var user = new AppUser()
+        {
+            Email = model.Email,
+            Login = model.Login,
+            Password = hashedPasswordAndSalt.Item1,
+            Salt = hashedPasswordAndSalt.Item2,
+            RefreshToken = SecurityHelpers.GenerateRefreshToken(),
+            RefreshTokenExp = DateTime.Now.AddDays(1)
+        };
+        
+        await _sqlContext.Users.AddAsync(user);
+        await _sqlContext.SaveChangesAsync();
+    
+        return Errors.Ok;
+    }
+    
+    public async Task<TokenResult> LoginUser(LoginRequest loginRequest)
+    {
+        AppUser user = await _sqlContext.Users.Where(u => u.Login == loginRequest.Login).FirstOrDefaultAsync();
+    
+        string passwordHashFromDb = user.Password;
+        string curHashedPassword = SecurityHelpers.GetHashedPasswordWithSalt(loginRequest.Password, user.Salt);
+    
+        if (passwordHashFromDb != curHashedPassword)
+        {
+            return null;
+        }
+    
+    
+        Claim[] userclaim = new[]
+        {
+            new Claim(ClaimTypes.Name, "marcin"),
+            new Claim(ClaimTypes.Role, "user"),
+            new Claim(ClaimTypes.Role, "admin")
+        };
+    
+        SymmetricSecurityKey key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["SecretKey"]));
+    
+        SigningCredentials creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
+    
+        JwtSecurityToken token = new JwtSecurityToken(
+            issuer: "https://localhost:5001",
+            audience: "https://localhost:5001",
+            claims: userclaim,
+            expires: DateTime.Now.AddMinutes(10),
+            signingCredentials: creds
+        );
+    
+        user.RefreshToken = SecurityHelpers.GenerateRefreshToken();
+        user.RefreshTokenExp = DateTime.Now.AddDays(1);
+        await _sqlContext.SaveChangesAsync();
+        
+        return new TokenResult{
+            accessToken = new JwtSecurityTokenHandler().WriteToken(token),
+            refreshToken =  user.RefreshToken
+            };
+    }
+    
+    public async Task<TokenResult> RefreshUser(RefreshTokenRequest refreshToken)
+    {
+        AppUser user = await _sqlContext.Users.Where(u => u.RefreshToken == refreshToken.RefreshToken).FirstOrDefaultAsync();
+        if (user == null)
+        {
+            throw new SecurityTokenException("Invalid refresh token");
+        }
+    
+        if (user.RefreshTokenExp < DateTime.Now)
+        {
+            throw new SecurityTokenException("Refresh token expired");
+        }
+        
+        Claim[] userclaim = new[]
+        {
+            new Claim(ClaimTypes.Name, "marcin"),
+            new Claim(ClaimTypes.Role, "user"),
+            new Claim(ClaimTypes.Role, "admin")
+        };
+    
+        SymmetricSecurityKey key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["SecretKey"]));
+    
+        SigningCredentials creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
+    
+        JwtSecurityToken jwtToken = new JwtSecurityToken(
+            issuer: "https://localhost:5001",
+            audience: "https://localhost:5001",
+            claims: userclaim,
+            expires: DateTime.Now.AddMinutes(10),
+            signingCredentials: creds
+        );
+    
+        user.RefreshToken = SecurityHelpers.GenerateRefreshToken();
+        user.RefreshTokenExp = DateTime.Now.AddDays(1);
+        await _sqlContext.SaveChangesAsync();
+    
+        return new TokenResult{
+            accessToken = new JwtSecurityTokenHandler().WriteToken(jwtToken),
+            refreshToken = user.RefreshToken
+        };
     }
 }

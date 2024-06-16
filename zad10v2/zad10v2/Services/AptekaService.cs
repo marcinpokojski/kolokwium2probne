@@ -39,4 +39,20 @@ public class AptekaService : IAptekaService
 
         return new ResultDTO(200, "ok", result);
     }
+
+    public async Task<Errors> RegisterUser(RegisterRequest model)
+    {
+        return await _aptekaRepsitory.AddUser(model);
+        
+    }
+
+    public async Task<TokenResult> LoginUser(LoginRequest loginRequest)
+    {
+        return await _aptekaRepsitory.LoginUser(loginRequest);
+    }
+
+    public async Task<TokenResult> RefreshUser(RefreshTokenRequest refreshToken)
+    {
+        return await _aptekaRepsitory.RefreshUser(refreshToken);
+    }
 }
